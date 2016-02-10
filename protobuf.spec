@@ -1,35 +1,36 @@
 # Build -python subpackage
 %bcond_without python
 # Build -java subpackage
-%bcond_without java
+%bcond_with java
 # Don't require gtest
 %bcond_with gtest
+# Don't require emacs and vim
+%bcond_with emacs
+%bcond_with vim
 
 %if %{with python}
 %define python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")
 %endif
 
+%if %{with emacs}
 %global emacs_version %(pkg-config emacs --modversion)
 %global emacs_lispdir %(pkg-config emacs --variable sitepkglispdir)
 %global emacs_startdir %(pkg-config emacs --variable sitestartdir)
+%endif
 
 Summary:        Protocol Buffers - Google's data interchange format
 Name:           protobuf
-Version:        2.5.0
-Release:        8%{?dist}
+Version:        2.6.1
+Release:        1%{?dist}
 License:        BSD
 Group:          Development/Libraries
-Source:         http://protobuf.googlecode.com/files/protobuf-%{version}.tar.bz2
-Source1:        ftdetect-proto.vim
-Source2:        protobuf-init.el
-Patch1:         protobuf-2.5.0-fedora-gtest.patch
-Patch2:         protobuf-2.5.0-java-fixes.patch
-Patch3:         0001-Add-generic-GCC-support-for-atomic-operations.patch
-Patch4:         protobuf-2.5.0-makefile.patch
+Source:         %{name}-%{version}.tar.gz
 URL:            http://code.google.com/p/protobuf/
 BuildRequires:  automake autoconf libtool pkgconfig zlib-devel
+%if %{with emacs}
 BuildRequires:  emacs
 BuildRequires:  emacs-el >= 24.1
+%endif
 %if %{with gtest}
 BuildRequires:  gtest-devel
 %endif
@@ -126,6 +127,7 @@ Conflicts: %{name}-compiler < %{version}
 This package contains Python libraries for Google Protocol Buffers
 %endif
 
+%if %{with vim}
 %package vim
 Summary: Vim syntax highlighting for Google Protocol Buffers descriptions
 Group: Development/Libraries
@@ -134,7 +136,9 @@ Requires: vim-enhanced
 %description vim
 This package contains syntax highlighting for Google Protocol Buffers
 descriptions in Vim editor
+%endif
 
+%if %{with emacs}
 %package emacs
 Summary: Emacs mode for Google Protocol Buffers descriptions
 Group: Applications/Editors
@@ -153,7 +157,7 @@ Requires: protobuf-emacs = %{version}
 This package contains the elisp source files for %{name}-emacs
 under GNU Emacs. You do not need to install this package to use
 %{name}-emacs.
-
+%endif
 
 %if %{with java}
 %package java
@@ -189,16 +193,11 @@ This package contains the API documentation for %{name}-java.
 %setup -q
 %if %{with gtest}
 rm -rf gtest
-%patch1 -p1 -b .gtest
 %endif
 chmod 644 examples/*
 %if %{with java}
-%patch2 -p1 -b .java-fixes
 rm -rf java/src/test
 %endif
-
-%patch3 -p1 -b .generic-atomics
-%patch4 -p1 -b .generic-atomics-makefile
 
 %build
 iconv -f iso8859-1 -t utf-8 CONTRIBUTORS.txt > CONTRIBUTORS.txt.utf8
@@ -223,7 +222,9 @@ pushd java
 popd
 %endif
 
+%if %{with emacs}
 emacs -batch -f batch-byte-compile editors/protobuf-mode.el
+%endif
 
 %check
 #make %{?_smp_mflags} check
@@ -238,8 +239,9 @@ pushd python
 python ./setup.py install --root=%{buildroot} --single-version-externally-managed --record=INSTALLED_FILES --optimize=1
 popd
 %endif
-install -p -m 644 -D %{SOURCE1} %{buildroot}%{_datadir}/vim/vimfiles/ftdetect/proto.vim
+%if %{with vim}
 install -p -m 644 -D editors/proto.vim %{buildroot}%{_datadir}/vim/vimfiles/syntax/proto.vim
+%endif
 
 %if %{with java}
 pushd java
@@ -247,12 +249,12 @@ pushd java
 popd
 %endif
 
+%if %{with emacs}
 mkdir -p $RPM_BUILD_ROOT%{emacs_lispdir}
 mkdir -p $RPM_BUILD_ROOT%{emacs_startdir}
 install -p -m 0644 editors/protobuf-mode.el $RPM_BUILD_ROOT%{emacs_lispdir}
 install -p -m 0644 editors/protobuf-mode.elc $RPM_BUILD_ROOT%{emacs_lispdir}
-install -p -m 0644 %{SOURCE2} $RPM_BUILD_ROOT%{emacs_startdir}
-
+%endif
 
 %post -p /sbin/ldconfig
 %postun -p /sbin/ldconfig
@@ -266,13 +268,13 @@ install -p -m 0644 %{SOURCE2} $RPM_BUILD_ROOT%{emacs_startdir}
 %files
 %defattr(-, root, root, -)
 %{_libdir}/libprotobuf.so.*
-%doc CHANGES.txt CONTRIBUTORS.txt COPYING.txt README.txt
+%doc CHANGES.txt CONTRIBUTORS.txt INSTALL.txt
 
 %files compiler
 %defattr(-, root, root, -)
 %{_bindir}/protoc
 %{_libdir}/libprotoc.so.*
-%doc COPYING.txt README.txt
+%doc INSTALL.txt
 
 %files devel
 %defattr(-, root, root, -)
@@ -312,11 +314,14 @@ install -p -m 0644 %{SOURCE2} $RPM_BUILD_ROOT%{emacs_startdir}
 %doc examples/add_person.py examples/list_people.py examples/addressbook.proto
 %endif
 
+%if %{with vim}
 %files vim
 %defattr(-, root, root, -)
 %{_datadir}/vim/vimfiles/ftdetect/proto.vim
 %{_datadir}/vim/vimfiles/syntax/proto.vim
+%endif
 
+%if %{with emacs}
 %files emacs
 %defattr(-,root,root,-)
 %{emacs_startdir}/protobuf-init.el
@@ -325,6 +330,7 @@ install -p -m 0644 %{SOURCE2} $RPM_BUILD_ROOT%{emacs_startdir}
 %files emacs-el
 %defattr(-,root,root,-)
 %{emacs_lispdir}/protobuf-mode.el
+%endif
 
 %if %{with java}
 %files java -f java/.mfiles
