@@ -325,10 +325,8 @@ COMMON_TEST_SOURCES =                                          \
 check_PROGRAMS = protoc protobuf-test protobuf-lazy-descriptor-test \
                  protobuf-lite-test test_plugin $(GZCHECKPROGRAMS)
 protobuf_test_LDADD = $(PTHREAD_LIBS) libprotobuf.la libprotoc.la \
-                      $(top_builddir)/gtest/lib/libgtest.la       \
-                      $(top_builddir)/gtest/lib/libgtest_main.la
-protobuf_test_CPPFLAGS = -I$(top_srcdir)/gtest/include         \
-                         -I$(top_builddir)/gtest/include
+                      -lgtest -lgtest_main
+protobuf_test_CPPFLAGS =
 # Disable optimization for tests unless the user explicitly asked for it,
 # since test_util.cc takes forever to compile with optimization (with GCC).
 # See configure.ac for more info.
@@ -375,11 +373,8 @@ nodist_protobuf_test_SOURCES = $(protoc_outputs)
 # Run cpp_unittest again with PROTOBUF_TEST_NO_DESCRIPTORS defined.
 protobuf_lazy_descriptor_test_LDADD = $(PTHREAD_LIBS) libprotobuf.la \
                       libprotoc.la                                   \
-                      $(top_builddir)/gtest/lib/libgtest.la          \
-                      $(top_builddir)/gtest/lib/libgtest_main.la
-protobuf_lazy_descriptor_test_CPPFLAGS = -I$(top_srcdir)/gtest/include    \
-                                         -I$(top_builddir)/gtest/include  \
-                                         -DPROTOBUF_TEST_NO_DESCRIPTORS
+                      -lgtest -lgtest_main
+protobuf_lazy_descriptor_test_CPPFLAGS = -DPROTOBUF_TEST_NO_DESCRIPTORS
 protobuf_lazy_descriptor_test_CXXFLAGS = $(NO_OPT_CXXFLAGS)
 protobuf_lazy_descriptor_test_SOURCES =                        \
   google/protobuf/compiler/cpp/cpp_unittest.cc                 \
@@ -397,7 +392,7 @@ nodist_protobuf_lite_test_SOURCES = $(protoc_lite_outputs)
 
 # Test plugin binary.
 test_plugin_LDADD = $(PTHREAD_LIBS) libprotobuf.la libprotoc.la \
-                    $(top_builddir)/gtest/lib/libgtest.la
+                    -lgtest
 test_plugin_CPPFLAGS = -I$(top_srcdir)/gtest/include         \
                        -I$(top_builddir)/gtest/include
 test_plugin_SOURCES =                                          \
