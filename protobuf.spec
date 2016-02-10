@@ -340,6 +340,9 @@ install -p -m 0644 editors/protobuf-mode.elc $RPM_BUILD_ROOT%{emacs_lispdir}
 %endif
 
 %changelog
+* Wed Feb 10 2016 Tomasz Rostanski <tomasz.rostanski@thalesgroup.com> 2.6.1-1
+- Initial version 
+
 * Mon Jul 27 2015 Adrian Reber <areber@redhat.com> - 2.5.0-8
 - Merge specfiles
 
