@@ -210,8 +210,10 @@ make %{?_smp_mflags}
 
 %if %{with python}
 pushd python
-python ./setup.py build
-sed -i -e 1d build/lib/google/protobuf/descriptor_pb2.py
+export PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=cpp
+export PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION_VERSION=2
+python ./setup.py build --cpp_implementation
+sed -i -e 1d build/lib*/google/protobuf/descriptor_pb2.py
 popd
 %endif
 
@@ -236,7 +238,9 @@ find %{buildroot} -type f -name "*.la" -exec rm -f {} \;
 
 %if %{with python}
 pushd python
-python ./setup.py install --root=%{buildroot} --single-version-externally-managed --record=INSTALLED_FILES --optimize=1
+export PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=cpp
+export PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION_VERSION=2
+python ./setup.py install --root=%{buildroot} --single-version-externally-managed --record=INSTALLED_FILES --optimize=1 --cpp_implementation
 popd
 %endif
 %if %{with vim}
@@ -306,10 +310,10 @@ install -p -m 0644 editors/protobuf-mode.elc $RPM_BUILD_ROOT%{emacs_lispdir}
 %if %{with python}
 %files python
 %defattr(-, root, root, -)
-%dir %{python_sitelib}/google
-%{python_sitelib}/google/protobuf/
-%{python_sitelib}/protobuf-%{version}-py2.?.egg-info/
-%{python_sitelib}/protobuf-%{version}-py2.?-nspkg.pth
+%dir %{python_sitearch}/google
+%{python_sitearch}/google/protobuf/
+%{python_sitearch}/protobuf-%{version}-py2.?.egg-info/
+%{python_sitearch}/protobuf-%{version}-py2.?-nspkg.pth
 %doc python/README.txt
 %doc examples/add_person.py examples/list_people.py examples/addressbook.proto
 %endif
