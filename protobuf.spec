@@ -21,7 +21,7 @@
 Summary:        Protocol Buffers - Google's data interchange format
 Name:           protobuf
 Version:        2.6.1
-Release:        2%{?dist}
+Release:        3%{?dist}
 License:        BSD
 Group:          Development/Libraries
 Source:         %{name}-%{version}.tar.gz
@@ -344,6 +344,10 @@ install -p -m 0644 editors/protobuf-mode.elc $RPM_BUILD_ROOT%{emacs_lispdir}
 %endif
 
 %changelog
+* Fri Dec 02 2016 Michal Gawlik <michal.gawlik@thalesgroup.com> 2.6.1-3
+- Fix offline building - add required python modules
+  (tomasz.rostanski@thalesgroup.com.pl)
+
 * Thu Nov 10 2016 Michal Gawlik <michal.gawlik@thalesgroup.com> 2.6.1-2
 - protobuf.spec: build python module using experimental C++ module
   (performance) (michal.gawlik@thalesgroup.com)
