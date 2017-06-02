@@ -154,6 +154,11 @@ if __name__ == '__main__':
         libraries = [ "protobuf" ],
         library_dirs = [ '../src/.libs' ],
         ))
+    ext_module_list.append(Extension(
+        "google.protobuf.internal._api_implementation",
+        [ "google/protobuf/internal/api_implementation.cc" ],
+        extra_compile_args=['-DPYTHON_PROTO2_CPP_IMPL_V2'],
+        ))
 
   setup(name = 'protobuf',
         version = '2.6.1',
